@@ -64,7 +64,7 @@ do_kernel_metadata() {
 	set +e
 	cd ${S}
 	export KMETA=${KMETA}
-
+        echo ">>> inside do_kernel_metadata <<<"
 	# if kernel tools are available in-tree, they are preferred
 	# and are placed on the path before any external tools. Unless
 	# the external tools flag is set, in that case we do nothing.
@@ -131,6 +131,7 @@ do_kernel_metadata() {
 	    sccs_from_src_uri=$(echo $sccs_from_src_uri | awk '{ if ($0!="defconfig") { print $0 } }' RS=' ')
 	fi
 	sccs="$sccs $sccs_from_src_uri"
+	#sccs="$sccs $sccs_from_src_uri /home/ubuntu/joji/openbmc/meta-openbmc-bsp/meta-aspeed/recipes-kernel/linux/linux-aspeed/ast1250/defconfig"
 
 	# check for feature directories/repos/branches that were part of the
 	# SRC_URI. If they were supplied, we convert them into include directives
@@ -154,12 +155,23 @@ do_kernel_metadata() {
 
 	# expand kernel features into their full path equivalents
 	bsp_definition=$(spp ${includes} --find -DKMACHINE=${KMACHINE} -DKTYPE=${LINUX_KERNEL_TYPE})
+        echo "**********************************"
+        echo "includes: $includes KMACHINE: ${KMACHINE} LINUX_KERNEL_TYPE: ${LINUX_KERNEL_TYPE}"
+        echo "@@@@ bsp_definition is $bsp_definition"
+        echo "@@@@ sccs is $sccs"
+        echo "@@@@ WORKDIR is ${WORKDIR}"
+        echo "**********************************"
 	if [ -z "$bsp_definition" ]; then
 		echo "$sccs" | grep -q defconfig
 		if [ $? -ne 0 ]; then
 			bbfatal_log "Could not locate BSP definition for ${KMACHINE}/${LINUX_KERNEL_TYPE} and no defconfig was provided"
+                else 
+                        echo "#### sccs is $sccs"
 		fi
+        else 
+             echo "@@@@ bsp_definition is $bsp_definition"
 	fi
+        #bbfatal_log "Exiting for test"
 	meta_dir=$(kgit --meta)
 
 	# run1: pull all the configuration fragments, no matter where they come from
