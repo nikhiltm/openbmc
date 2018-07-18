@@ -64,6 +64,9 @@ do_kernel_metadata() {
 	set +e
 	cd ${S}
 	export KMETA=${KMETA}
+	echo "kmeta: ${KMETA}"
+	export KERNEL_BLAH=${KMETA}
+	echo "kernel_features: ${KERNEL_BLAH}"
 
 	# if kernel tools are available in-tree, they are preferred
 	# and are placed on the path before any external tools. Unless
@@ -162,20 +165,22 @@ do_kernel_metadata() {
 	fi
 	meta_dir=$(kgit --meta)
 
+	echo "Blah ${bsp_definition} :: ${sccs} :: ${patches} :: ${KERNEL_BLAH}"
+	
 	# run1: pull all the configuration fragments, no matter where they come from
-	elements="`echo -n ${bsp_definition} ${sccs} ${patches} ${KERNEL_FEATURES}`"
+	elements="`echo -n ${bsp_definition} ${sccs} ${patches} ${KERNEL_BLAH}`"
 	if [ -n "${elements}" ]; then
 		echo "${bsp_definition}" > ${S}/${meta_dir}/bsp_definition
-		scc --force -o ${S}/${meta_dir}:cfg,merge,meta ${includes} ${bsp_definition} ${sccs} ${patches} ${KERNEL_FEATURES}
+		scc --force -o ${S}/${meta_dir}:cfg,merge,meta ${includes} ${bsp_definition} ${sccs} ${patches} ${KERNEL_BLAH}
 		if [ $? -ne 0 ]; then
 			bbfatal_log "Could not generate configuration queue for ${KMACHINE}."
 		fi
 	fi
 
 	# run2: only generate patches for elements that have been passed on the SRC_URI
-	elements="`echo -n ${sccs} ${patches} ${KERNEL_FEATURES}`"
+	elements="`echo -n ${sccs} ${patches} ${KERNEL_BLAH}`"
 	if [ -n "${elements}" ]; then
-		scc --force -o ${S}/${meta_dir}:patch --cmds patch ${includes} ${sccs} ${patches} ${KERNEL_FEATURES}
+		scc --force -o ${S}/${meta_dir}:patch --cmds patch ${includes} ${sccs} ${patches} ${KERNEL_BLAH}
 		if [ $? -ne 0 ]; then
 			bbfatal_log "Could not generate configuration queue for ${KMACHINE}."
 		fi
